@@ -1,0 +1,27 @@
+﻿name: .NET Core
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: |
+            6.0.x
+      - name: Install dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --configuration Release --no-restore -p:Version=1.0.${{github.run_number}}
+      - name: Package
+        run: |
+          dotnet pack Toxon.Integresql.Client/Toxon.Integresql.Client.csproj --configuration Release --no-build -o artifacts/ -p:PackageVersion=1.0.${{github.run_number}}
+      - name: Push
+        run: |
+          dotnet nuget push ./artifacts/Toxon.Integresql.Client.*.nupkg --skip-duplicate --api-key ${{secrets.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
