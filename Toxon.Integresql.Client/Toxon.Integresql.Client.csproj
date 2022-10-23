@@ -4,6 +4,8 @@
         <TargetFramework>netstandard2.0</TargetFramework>
         <LangVersion>latest</LangVersion>
         <Nullable>enable</Nullable>
+        <RepositoryUrl>https://github.com/will14smith/integresql-client-dotnet</RepositoryUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
     </PropertyGroup>
 
     <ItemGroup>
