@@ -15,17 +15,19 @@ namespace Toxon.Integresql.Client;
 public class IntegresqlClient : IIntegresqlTemplateClient, IIntegresqlDatabaseClient
 {
     private readonly HttpClient _httpClient;
+    private readonly Uri _baseUri;
 
     public IntegresqlClient(Uri baseUri, HttpMessageHandler? httpMessageHandler = null)
     {
+        _baseUri = baseUri;
         _httpClient = new HttpClient(httpMessageHandler);
-        _httpClient.BaseAddress = baseUri;
+        _httpClient.BaseAddress = _baseUri;
     }
     
     #region Templates
     public async Task<TemplateDatabase> InitializeTemplate(string hash)
     {
-        var request = new HttpRequestMessage(HttpMethod.Post, "/templates");
+        var request = new HttpRequestMessage(HttpMethod.Post, $"{_baseUri.AbsoluteUri}/templates");
         request.Content = SerializeRequest(new InitializeTemplateRequest
         {
             Hash = hash
@@ -53,7 +55,7 @@ public class IntegresqlClient : IIntegresqlTemplateClient, IIntegresqlDatabaseCl
     
     public async Task FinalizeTemplate(TemplateDatabase database)
     {
-        var request = new HttpRequestMessage(HttpMethod.Put, $"/templates/{database.Hash}");
+        var request = new HttpRequestMessage(HttpMethod.Put, $"{_baseUri.AbsoluteUri}/templates/{database.Hash}");
      
         var response = await _httpClient.SendAsync(request).ConfigureAwait(false);
         switch (response.StatusCode)
@@ -73,7 +75,7 @@ public class IntegresqlClient : IIntegresqlTemplateClient, IIntegresqlDatabaseCl
 
     public async Task DiscardTemplate(TemplateDatabase database)
     {
-        var request = new HttpRequestMessage(HttpMethod.Delete, $"/templates/{database.Hash}");
+        var request = new HttpRequestMessage(HttpMethod.Delete, $"{_baseUri.AbsoluteUri}/templates/{database.Hash}");
      
         var response = await _httpClient.SendAsync(request).ConfigureAwait(false);
         switch (response.StatusCode)
@@ -96,7 +98,7 @@ public class IntegresqlClient : IIntegresqlTemplateClient, IIntegresqlDatabaseCl
     #region Databases
     public async Task<TestDatabase> GetDatabase(string hash)
     {
-        var request = new HttpRequestMessage(HttpMethod.Get, $"/templates/{hash}/tests");
+        var request = new HttpRequestMessage(HttpMethod.Get, $"{_baseUri.AbsoluteUri}/templates/{hash}/tests");
         
         var response = await _httpClient.SendAsync(request).ConfigureAwait(false);
         switch (response.StatusCode)
@@ -122,7 +124,7 @@ public class IntegresqlClient : IIntegresqlTemplateClient, IIntegresqlDatabaseCl
 
     public async Task ReturnDatabase(TestDatabase database)
     {
-        var request = new HttpRequestMessage(HttpMethod.Delete, $"/templates/{database.Hash}/tests/{database.Id}");
+        var request = new HttpRequestMessage(HttpMethod.Delete, $"{_baseUri.AbsoluteUri}/templates/{database.Hash}/tests/{database.Id}");
         
         var response = await _httpClient.SendAsync(request).ConfigureAwait(false);
         switch (response.StatusCode)
